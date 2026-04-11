@@ -20,7 +20,7 @@ It provides **data-driven insights** using:
 
 ### 🔹 Network Performance Overview
 
-![Dashboard 2](images/dashboard2.png)
+![Dashboard 2](https://github.com/Devmurari0205/6G-Network-Performance-Analysis/blob/main/tableau/dashboard2.png)
 
 ---
 
