@@ -3,20 +3,14 @@ python-3.11
 
 streamlit
 pandas
-numpy
 plotly
-matplotlib
-seaborn
-scikit-learn
+numpy
+
 
 import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-
-git add requirements.txt
-git commit -m "fixed requirements"
-git push
 
 streamlit
 pandas
