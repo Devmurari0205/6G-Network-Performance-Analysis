@@ -1,14 +1,10 @@
+python-3.11
+
 streamlit
 pandas
 plotly
 
-runtime.txt
-python-3.11
-
 git add .
-git commit -m "fixed deployment error"
+git commit -m "fixed requirements error"
 git push
 
-streamlit==1.32.0
-pandas==2.1.4
-plotly==5.18.0
