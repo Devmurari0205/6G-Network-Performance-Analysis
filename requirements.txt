@@ -1,18 +1,23 @@
-streamlit==1.33.0
-pandas==2.2.2
-numpy==1.26.4
-plotly==5.22.0
-matplotlib==3.8.4
-seaborn==0.13.2
-scikit-learn==1.4.2
+python-3.11
+
+streamlit
+pandas
+numpy
+plotly
+matplotlib
+seaborn
+scikit-learn
 
 import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-
 git add requirements.txt
-git commit -m "added requirements"
+git commit -m "fixed requirements"
 git push
+
+streamlit
+pandas
+plotly
 
