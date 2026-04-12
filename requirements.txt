@@ -6,6 +6,13 @@ matplotlib==3.8.4
 seaborn==0.13.2
 scikit-learn==1.4.2
 
+
+
 git add requirements.txt
 git commit -m "added requirements"
 git push
+
+import streamlit as st                                                  
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go 
