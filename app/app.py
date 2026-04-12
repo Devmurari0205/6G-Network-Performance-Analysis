@@ -148,10 +148,20 @@ st.title("📊 NETWORK PERFORMANCE DASHBOARD")
 # =========================
 col1, col2, col3 = st.columns(3)
 
-col1.metric("Avg Network Stability Index", round(df['Network_Stability_Index'].mean(), 2))
-col2.metric("Avg Latency (ms)", round(df['Network_Latency_ms'].mean(), 2))
-col3.metric("High Efficiency %",
-            round((df['Efficiency_Status'] == "High").mean()*100, 2))
+col1.metric(
+    "Avg Network Stability Index",
+    round(df['network_stability_index'].mean(), 2)
+)
+
+col2.metric(
+    "Avg Latency (ms)",
+    round(df['latency_ms'].mean(), 2)
+)
+
+col3.metric(
+    "High Efficiency %",
+    round((df['efficiency_status'] == "High").mean() * 100, 2)
+)
 
 # =========================
 # CHART ROW 1
