@@ -66,11 +66,27 @@ if 'date' in df.columns:
 else:
     st.error(f"❌ 'date' column not found. Available columns: {df.columns}")
 
-latency_band = st.sidebar.multiselect(
-    "Latency Band",
-    df['Latency_Band'].unique(),
-    default=df['Latency_Band'].unique()
-)
+if 'latency_ms' in df.columns:
+    
+    df['latency_band'] = pd.cut(
+        df['latency_ms'],
+        bins=[0, 50, 100, 200, 500],
+        labels=['Low', 'Medium', 'High', 'Very High']
+    )
+st.sidebar.title("🔍 Filters")
+
+if 'latency_band' in df.columns:
+
+    latency_band = st.sidebar.multiselect(
+        "Latency Band",
+        options=df['latency_band'].dropna().unique(),
+        default=df['latency_band'].dropna().unique()
+    )
+
+    df = df[df['latency_band'].isin(latency_band)]
+
+else:
+    st.error(f"❌ latency_band not found. Available columns: {df.columns}")
 
 quality = st.sidebar.multiselect(
     "Network_Quality",
