@@ -255,10 +255,13 @@ else:
 col1, col2, col3 = st.columns(3)
 
 # Efficiency Status Distribution
-fig4 = px.histogram(df, x='Efficiency_Status',
-                    color='Efficiency_Status',
-                    title="Efficiency Status Distribution")
-col1.plotly_chart(fig4, use_container_width=True)
+fig4 = px.histogram(
+    df,
+    x='efficiency_status',
+    color='efficiency_status',
+    title="Efficiency Status Distribution",
+    text_auto=True
+)
 
 # Scatter (Latency vs Speed)
 fig5 = px.scatter(df, x='Network_Latency_ms', y='Production_Speed_units_per_hr',
