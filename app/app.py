@@ -26,6 +26,13 @@ def load_data():
 
 df = load_data()
 
+df.columns = (
+    df.columns
+    .str.strip()
+    .str.replace(" ", "_")
+    .str.lower()
+)
+
 # Fix Date column
 if 'date' in df.columns:
     df['date'] = pd.to_datetime(df['date'], errors='coerce')
@@ -101,11 +108,20 @@ if 'network_quality' in df.columns:
 else:
     st.error(f"❌ network_quality not found. Available: {df.columns}")
 
-operation = st.sidebar.multiselect(
-    "Operation_Mode",
-    df['Operation_Mode'].unique(),
-    default=df['Operation_Mode'].unique()
-)
+st.sidebar.title("🔍 Filters")
+
+if 'operation_mode' in df.columns:
+
+    operation = st.sidebar.multiselect(
+        "Operation Mode",
+        options=df['operation_mode'].dropna().unique(),
+        default=df['operation_mode'].dropna().unique()
+    )
+
+    df = df[df['operation_mode'].isin(operation)]
+
+else:
+    st.error(f"❌ operation_mode not found. Available: {df.columns}")
 
 # FILTER DATA
 df = df[
