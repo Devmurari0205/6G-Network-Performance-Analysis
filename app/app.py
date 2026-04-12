@@ -206,10 +206,34 @@ else:
     st.error(f"Missing columns. Available: {df.columns}")
 
 # Daily Trend
-trend = df.groupby('Date')[['Network_Latency_ms', 'Production_Speed_units_per_hr']].mean().reset_index()
-fig2 = px.line(trend, x='Date', y=['Network_Latency_ms', 'Production_Speed_units_per_hr'],
-               title="Daily Network & Production Trend")
-col2.plotly_chart(fig2, use_container_width=True)
+# Check columns safely
+if all(col in df.columns for col in ['date', 'production_speed_units_per_hr']):
+
+    # detect correct latency column
+    latency_col = None
+    if 'latency_ms' in df.columns:
+        latency_col = 'latency_ms'
+    elif 'network_latency_ms' in df.columns:
+        latency_col = 'network_latency_ms'
+
+    if latency_col:
+
+        trend = df.groupby('date')[[latency_col, 'production_speed_units_per_hr']].mean().reset_index()
+
+        fig2 = px.line(
+            trend,
+            x='date',
+            y=[latency_col, 'production_speed_units_per_hr'],
+            title="Daily Network & Production Trend"
+        )
+
+        col2.plotly_chart(fig2, use_container_width=True)
+
+    else:
+        st.error("❌ Latency column not found")
+
+else:
+    st.error(f"❌ Required columns missing. Available: {df.columns}")
 
 # Pie Chart (Network Quality)
 fig3 = px.pie(df, names='Network_Quality',
