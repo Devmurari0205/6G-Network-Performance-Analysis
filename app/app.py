@@ -41,11 +41,30 @@ df = load_data()
 # =========================
 st.sidebar.title("🔍 Filters")
 
-month = st.sidebar.multiselect(
-    "Month",
-    df['date'].dt.month_name().unique(),
-    default=df['date'].dt.month_name().unique()
-)
+# Check if date column exists
+if 'date' in df.columns:
+    
+    # Convert to datetime
+    df['date'] = pd.to_datetime(df['date'], errors='coerce')
+    
+    # Drop null dates (important)
+    df = df.dropna(subset=['date'])
+    
+    # Extract months
+    month_list = df['date'].dt.month_name().unique()
+    
+    # Sidebar filter
+    month = st.sidebar.multiselect(
+        "Month",
+        options=month_list,
+        default=month_list
+    )
+    
+    # Apply filter
+    df = df[df['date'].dt.month_name().isin(month)]
+
+else:
+    st.error(f"❌ 'date' column not found. Available columns: {df.columns}")
 
 latency_band = st.sidebar.multiselect(
     "Latency Band",
