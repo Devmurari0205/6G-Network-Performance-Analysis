@@ -264,11 +264,28 @@ fig4 = px.histogram(
 )
 
 # Scatter (Latency vs Speed)
-fig5 = px.scatter(df, x='Network_Latency_ms', y='Production_Speed_units_per_hr',
-                  color='Network_Quality',
-                  title="Latency vs Production Speed")
-col2.plotly_chart(fig5, use_container_width=True)
+# Detect correct latency column
+latency_col = None
 
+if 'latency_ms' in df.columns:
+    latency_col = 'latency_ms'
+elif 'network_latency_ms' in df.columns:
+    latency_col = 'network_latency_ms'
+
+if all(col in df.columns for col in ['production_speed_units_per_hr', 'network_quality']) and latency_col:
+
+    fig5 = px.scatter(
+        df,
+        x=latency_col,
+        y='production_speed_units_per_hr',
+        color='network_quality',
+        title="Latency vs Production Speed"
+    )
+
+    col2.plotly_chart(fig5, use_container_width=True)
+
+else:
+    st.error(f"❌ Required columns missing. Available: {df.columns}")
 # Area Chart
 latency_day = df.groupby(df['Date'].dt.day)['Efficiency'].mean().reset_index()
 fig6 = px.area(latency_day, x='Date', y='Efficiency',
