@@ -236,9 +236,18 @@ else:
     st.error(f"❌ Required columns missing. Available: {df.columns}")
 
 # Pie Chart (Network Quality)
-fig3 = px.pie(df, names='Network_Quality',
-              title="Network Quality Distribution")
-col3.plotly_chart(fig3, use_container_width=True)
+if 'network_quality' in df.columns:
+
+    fig3 = px.pie(
+        df,
+        names='network_quality',
+        title="Network Quality Distribution"
+    )
+
+    col3.plotly_chart(fig3, use_container_width=True)
+
+else:
+    st.error(f"❌ network_quality not found. Available: {df.columns}")
 
 # =========================
 # CHART ROW 2
