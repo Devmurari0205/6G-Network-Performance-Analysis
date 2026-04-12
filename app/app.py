@@ -8,15 +8,20 @@ import plotly.graph_objects as go
 # LOAD DATA
 # =========================
 @st.cache_data
-@st.cache_data
 def load_data():
-    df = pd.read_csv("data/network_performance.csv")
-    # FIX COLUMN NAMES
-    df.columns = df.columns.str.strip().str.replace(" ", "_")
-
-    # FIX DATE
-    df['Date'] = pd.to_datetime(df['Date'], dayfirst=True, errors='coerce')
-
+    df = pd.read_csv(
+        "data/network_performance.csv",
+        encoding='latin1',
+        engine='python'
+    )
+    
+    df.columns = (
+        df.columns
+        .str.strip()
+        .str.replace(" ", "_")
+        .str.lower()
+    )
+    
     return df
 df = load_data()
 
