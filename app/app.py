@@ -124,12 +124,19 @@ else:
     st.error(f"❌ operation_mode not found. Available: {df.columns}")
 
 # FILTER DATA
-df = df[
-    (df['Date'].dt.month_name().isin(month)) &
-    (df['Latency_Band'].isin(latency_band)) &
-    (df['Network_Quality'].isin(quality)) &
-    (df['Operation_Mode'].isin(operation))
-]
+if all(col in df.columns for col in ['date','latency_band','network_quality','operation_mode']):
+    
+    df['date'] = pd.to_datetime(df['date'], errors='coerce')
+
+    df = df[
+        (df['date'].dt.month_name().isin(month)) &
+        (df['latency_band'].isin(latency_band)) &
+        (df['network_quality'].isin(quality)) &
+        (df['operation_mode'].isin(operation))
+    ]
+
+else:
+    st.error(f"Missing columns. Available: {df.columns}")
 
 # =========================
 # DASHBOARD TITLE
