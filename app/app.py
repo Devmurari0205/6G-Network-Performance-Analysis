@@ -23,6 +23,16 @@ def load_data():
     )
     
     return df
+
+df = load_data()
+
+# Fix Date column
+if 'date' in df.columns:
+    df['date'] = pd.to_datetime(df['date'], errors='coerce')
+    months = df['date'].dt.month_name().unique()
+    st.write(months)
+else:
+    st.error(f"Date column not found. Available: {df.columns}")
 df = load_data()
 
 
