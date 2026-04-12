@@ -10,8 +10,7 @@ import plotly.graph_objects as go
 @st.cache_data
 @st.cache_data
 def load_data():
-    df = pd.read_csv(r"C:\united_inteship\Un_project\network_performance.csv", encoding='latin1')
-
+    df = pd.read_csv("data/network_performance.csv")
     # FIX COLUMN NAMES
     df.columns = df.columns.str.strip().str.replace(" ", "_")
 
