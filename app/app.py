@@ -88,11 +88,24 @@ if 'latency_band' in df.columns:
 else:
     st.error(f"❌ latency_band not found. Available columns: {df.columns}")
 
-quality = st.sidebar.multiselect(
-    "Network_Quality",
-     df['Network_Quality'].unique(),
-     default=df['Network_Quality'].unique()
-)
+st.sidebar.title("🔍 Filters")
+
+if 'network_quality' in df.columns:
+
+st.sidebar.title("🔍 Filters")
+
+if 'network_quality' in df.columns:
+
+    quality = st.sidebar.multiselect(
+        "Network Quality",
+        options=df['network_quality'].dropna().unique(),
+        default=df['network_quality'].dropna().unique()
+    )
+
+    df = df[df['network_quality'].isin(quality)]
+
+else:
+    st.error(f"❌ network_quality not found. Available: {df.columns}")
 
 operation = st.sidebar.multiselect(
     "Operation_Mode",
