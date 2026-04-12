@@ -43,8 +43,8 @@ st.sidebar.title("🔍 Filters")
 
 month = st.sidebar.multiselect(
     "Month",
-    df['Date'].dt.month_name().unique(),
-    default=df['Date'].dt.month_name().unique()
+    df['date'].dt.month_name().unique(),
+    default=df['date'].dt.month_name().unique()
 )
 
 latency_band = st.sidebar.multiselect(
