@@ -188,10 +188,22 @@ else:
 col1, col2, col3 = st.columns(3)
 
 # Efficiency by Operation Mode
-eff_mode = df.groupby('Operation_Mode')['Efficiency'].mean().reset_index()
-fig1 = px.bar(eff_mode, x='Operation_Mode', y='Efficiency',
-              color='Operation_Mode', title="Efficiency by Operation Mode")
-col1.plotly_chart(fig1, use_container_width=True)
+if 'operation_mode' in df.columns and 'efficiency' in df.columns:
+
+    eff_mode = df.groupby('operation_mode')['efficiency'].mean().reset_index()
+
+    fig1 = px.bar(
+        eff_mode,
+        x='operation_mode',
+        y='efficiency',
+        color='operation_mode',
+        title="Efficiency by Operation Mode"
+    )
+
+    col1.plotly_chart(fig1, use_container_width=True)
+
+else:
+    st.error(f"Missing columns. Available: {df.columns}")
 
 # Daily Trend
 trend = df.groupby('Date')[['Network_Latency_ms', 'Production_Speed_units_per_hr']].mean().reset_index()
