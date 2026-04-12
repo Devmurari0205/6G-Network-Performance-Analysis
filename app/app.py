@@ -88,12 +88,6 @@ if 'latency_band' in df.columns:
 else:
     st.error(f"❌ latency_band not found. Available columns: {df.columns}")
 
-st.sidebar.title("🔍 Filters")
-
-if 'network_quality' in df.columns:
-
-st.sidebar.title("🔍 Filters")
-
 if 'network_quality' in df.columns:
 
     quality = st.sidebar.multiselect(
