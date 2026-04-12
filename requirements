@@ -1,0 +1,11 @@
+streamlit==1.33.0
+pandas==2.2.2
+numpy==1.26.4
+plotly==5.22.0
+matplotlib==3.8.4
+seaborn==0.13.2
+scikit-learn==1.4.2
+
+git add requirements.txt
+git commit -m "added requirements"
+git push
