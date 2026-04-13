@@ -502,16 +502,38 @@ else:
 
 import numpy as np
 
-conditions = [
-    (df['Network_Latency_ms'] > 30) & (df['Packet_Loss'] > 3.5),
-    (df['Network_Latency_ms'] > 30) | (df['Packet_Loss'] > 3.5)
-]
+import numpy as np
 
-choices = ["CRITICAL", "WARNING"]
+# =========================
+# RISK LEVEL (FIXED)
+# =========================
 
-df['Risk_Level'] = np.select(conditions, choices, default="NORMAL")
+# 🔍 ensure correct column names exist
+if 'network_latency_ms' in df.columns:
+    latency_col = 'network_latency_ms'
+elif 'latency_ms' in df.columns:
+    latency_col = 'latency_ms'
+else:
+    latency_col = None
 
-fig12 = px.treemap(df,
-                   path=['Risk_Level'],
-                   title="Network Risk Events")
-col3.plotly_chart(fig12, use_container_width=True)
+if latency_col and 'packet_loss' in df.columns:
+
+    conditions = [
+        (df[latency_col] > 30) & (df['packet_loss'] > 3.5),
+        (df[latency_col] > 30) | (df['packet_loss'] > 3.5)
+    ]
+
+    choices = ["CRITICAL", "WARNING"]
+
+    df['risk_level'] = np.select(conditions, choices, default="NORMAL")
+
+    fig12 = px.treemap(
+        df,
+        path=['risk_level'],
+        title="Network Risk Events"
+    )
+
+    col3.plotly_chart(fig12, use_container_width=True)
+
+else:
+    col3.error(f"Missing columns. Available: {list(df.columns)}")
