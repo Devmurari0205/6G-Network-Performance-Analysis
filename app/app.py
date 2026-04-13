@@ -25,16 +25,17 @@ def load_data():
     return df
 
 df = load_data()
+df = pd.read_csv("network_performance.csv")
 
-df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
-
+# CLEAN COLUMN NAMES (FINAL STANDARD FORMAT)
 df.columns = (
     df.columns
     .str.strip()
-    .str.replace(" ", "_")
     .str.lower()
+    .str.replace(" ", "_")
+    .str.replace("(", "")
+    .str.replace(")", "")
 )
-
 # Fix Date column
 if 'date' in df.columns:
     df['date'] = pd.to_datetime(df['date'], errors='coerce')
@@ -321,21 +322,36 @@ st.title("📊 NETWORK IMPACT ON MANUFACTURING")
 # =========================
 # CREATE LATENCY BAND (IF NOT EXISTS)
 # =========================
-if 'latency_band' not in df.columns and 'latency_ms' in df.columns:
-    df['latency_band'] = pd.cut(
-        df['latency_ms'],
-        bins=[0, 15, 30, 50],
-        labels=['Low', 'Medium', 'High']
-    )
+if 'latency_band' not in df.columns:
+    if 'latency_ms' in df.columns:
+        df['latency_band'] = pd.cut(
+            df['latency_ms'],
+            bins=[0, 15, 30, 50],
+            labels=['Low', 'Medium', 'High']
+        )
 
 # =========================
 # KPI
 # =========================
+c# =========================
+# KPI
+# =========================
 col1, col2, col3 = st.columns(3)
 
-col1.metric("Avg Packet Loss", round(df['packet_loss'].mean(), 2))
-col2.metric("Avg Production Speed", round(df['production_speed_units_per_hr'].mean(), 2))
-col3.metric("Avg Error Rate", round(df['error_rate'].mean(), 2))
+col1.metric(
+    "Avg Packet Loss",
+    round(df['packet_loss'].mean(), 2) if 'packet_loss' in df.columns else "N/A"
+)
+
+col2.metric(
+    "Avg Production Speed",
+    round(df['production_speed_units_per_hr'].mean(), 2) if 'production_speed_units_per_hr' in df.columns else "N/A"
+)
+
+col3.metric(
+    "Avg Error Rate",
+    round(df['error_rate'].mean(), 2) if 'error_rate' in df.columns else "N/A"
+)
 
 # =========================
 # CHART
@@ -344,7 +360,11 @@ col1, col2, col3 = st.columns(3)
 
 if 'latency_band' in df.columns and 'production_speed_units_per_hr' in df.columns:
 
-    speed_band = df.groupby('latency_band')['production_speed_units_per_hr'].mean().reset_index()
+    speed_band = (
+        df.groupby('latency_band')['production_speed_units_per_hr']
+        .mean()
+        .reset_index()
+    )
 
     fig1 = px.bar(
         speed_band,
@@ -357,8 +377,7 @@ if 'latency_band' in df.columns and 'production_speed_units_per_hr' in df.column
     col1.plotly_chart(fig1, use_container_width=True)
 
 else:
-    col1.error(f"Columns found: {df.columns}")
-
+    col1.error(f"Missing columns. Available: {list(df.columns)}")
 # Heatmap
 heat = df.pivot_table(values='Network_Stability_Index',
                       index='Operation_Mode',
