@@ -321,11 +321,18 @@ col3.metric("Avg Error Rate", round(df['error_rate'].mean(), 2))
 col1, col2, col3 = st.columns(3)
 
 # Speed by Latency Band
-speed_band = df.groupby('Latency_Band')['Production_Speed_units_per_hr'].mean().reset_index()
-fig7 = px.bar(speed_band, x='Latency_Band', y='Production_Speed_units_per_hr',
-              color='Latency_Band',
-              title="Speed by Latency Band")
+speed_band = df.groupby('latency_band')['production_speed_units_per_hr'].mean().reset_index()
+
+fig7 = px.bar(
+    speed_band,
+    x='latency_band',
+    y='production_speed_units_per_hr',
+    color='latency_band',
+    title="Speed by Latency Band"
+)
+
 col1.plotly_chart(fig7, use_container_width=True)
+
 
 # Heatmap
 heat = df.pivot_table(values='Network_Stability_Index',
