@@ -42,6 +42,13 @@ else:
     st.error(f"Date column not found. Available: {df.columns}")
 df = load_data()
 
+# Create latency band safely
+if 'latency_band' not in df.columns:
+    df['latency_band'] = pd.cut(
+        df['latency_ms'],
+        bins=[0, 15, 30, 50],
+        labels=['Low', 'Medium', 'High']
+    )
 
 # =========================
 # SIDEBAR FILTERS
@@ -335,8 +342,6 @@ if 'latency_band' in df.columns and 'production_speed_units_per_hr' in df.column
 
     col1.plotly_chart(fig7, use_container_width=True)
 
-else:
-    st.error("Required columns not found")
 
 
 # Heatmap
