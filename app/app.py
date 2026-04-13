@@ -324,52 +324,25 @@ col3.metric("Avg Error Rate", round(df['error_rate'].mean(), 2))
 # =========================
 # CHART ROW 3
 # =========================
-# =========================
-# SAFE SPEED BY LATENCY BAND (NO ERROR)
-# =========================
 
 col1, col2, col3 = st.columns(3)
 
-# Standardize column names (important)
-df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
+# 1. Speed by Latency Band (FIXED)
+if 'latency_band' in df.columns and 'production_speed_units_per_hr' in df.columns:
 
-# Create latency_band safely
-try:
-    if 'latency_band' not in df.columns:
-        if 'latency_ms' in df.columns:
-            df['latency_band'] = pd.cut(
-                df['latency_ms'],
-                bins=[0, 15, 30, 50],
-                labels=['Low', 'Medium', 'High']
-            )
-except Exception as e:
-    st.error(f"Error creating latency band: {e}")
+    speed_band = df.groupby('latency_band')['production_speed_units_per_hr'].mean().reset_index()
 
-# ✅ Create chart safely (NO CRASH GUARANTEED)
-try:
-    if 'latency_band' in df.columns and 'production_speed_units_per_hr' in df.columns:
+    fig1 = px.bar(
+        speed_band,
+        x='latency_band',
+        y='production_speed_units_per_hr',
+        color='latency_band',
+        title="Speed by Latency Band"
+    )
+    c1.plotly_chart(fig1, use_container_width=True)
 
-        speed_band = (
-            df.groupby('latency_band', dropna=False)['production_speed_units_per_hr']
-            .mean()
-            .reset_index()
-        )
-
-        fig7 = px.bar(
-            speed_band,
-            x='latency_band',
-            y='production_speed_units_per_hr',
-            color='latency_band',
-            title="Speed by Latency Band"
-        )
-
-        col1.plotly_chart(fig7, use_container_width=True)
-
-    else:
-        st.warning("Required columns not found for chart")
-
-except Exception as e:
-    st.error(f"Chart error: {e}")
+else:
+    c1.warning("Missing data for chart")
 
 # Heatmap
 heat = df.pivot_table(values='Network_Stability_Index',
