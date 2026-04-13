@@ -35,8 +35,7 @@ df.columns = (
     .str.replace("(", "")
     .str.replace(")", "")
 )
-
-df['Latency_Band'] = df['latency_band']
+     
 # Fix Date column
 if 'date' in df.columns:
     df['date'] = pd.to_datetime(df['date'], errors='coerce')
