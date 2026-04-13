@@ -333,7 +333,7 @@ st.title("📊 NETWORK IMPACT ON MANUFACTURING")
 # CREATE LATENCY BAND (IF NOT EXISTS)
 # =========================
 if 'latency_band' not in df.columns:
-    if 'latency_ms' in df.columns:
+    if 'network_latency_ms' in df.columns:
         df['latency_band'] = pd.cut(
             df['latency_ms'],
             bins=[0, 15, 30, 50],
