@@ -384,8 +384,13 @@ else:
 
 # HEATMAP (FIXED)
 # =========================
+# =========================
+# IMPROVED HEATMAP (CLEAR)
+# =========================
+
 if all(col in df.columns for col in ['network_stability_index', 'operation_mode', 'machine_id']):
 
+    # Pivot table
     heat = df.pivot_table(
         values='network_stability_index',
         index='operation_mode',
@@ -393,13 +398,29 @@ if all(col in df.columns for col in ['network_stability_index', 'operation_mode'
         aggfunc='mean'
     )
 
+    # Round values for clarity
+    heat = heat.round(2)
+
+    # Create heatmap
     fig8 = go.Figure(data=go.Heatmap(
         z=heat.values,
         x=heat.columns,
-        y=heat.index
+        y=heat.index,
+        colorscale='RdYlGn',   # ✅ better colors (red→yellow→green)
+        colorbar=dict(title="NSI"),
+        text=heat.values,      # ✅ show values
+        texttemplate="%{text}", # ✅ print numbers inside boxes
+        hovertemplate="Mode: %{y}<br>Machine: %{x}<br>NSI: %{z}<extra></extra>"
     ))
 
-    fig8.update_layout(title="Machine NSI Heatmap")
+    # Layout improvements
+    fig8.update_layout(
+        title="📊 Machine Network Stability Heatmap",
+        xaxis_title="Machine ID",
+        yaxis_title="Operation Mode",
+        xaxis_tickangle=-45,
+        height=500
+    )
 
     col2.plotly_chart(fig8, use_container_width=True)
 
