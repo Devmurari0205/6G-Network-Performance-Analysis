@@ -25,7 +25,6 @@ def load_data():
     return df
 
 df = load_data()
-df = pd.read_csv("network_performance.csv")
 
 # CLEAN COLUMN NAMES (FINAL STANDARD FORMAT)
 df.columns = (
