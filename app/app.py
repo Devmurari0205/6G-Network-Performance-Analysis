@@ -2,295 +2,124 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import numpy as np
 
+st.set_page_config(layout="wide")
 
 # =========================
 # LOAD DATA
 # =========================
 @st.cache_data
 def load_data():
-    df = pd.read_csv(
-        "data/network_performance.csv",
-        encoding='latin1',
-        engine='python'
-    )
-    
+    df = pd.read_csv("network_performance.csv")
+
     df.columns = (
         df.columns
         .str.strip()
         .str.replace(" ", "_")
         .str.lower()
     )
-    
+
     return df
 
 df = load_data()
 
-df.columns = (
-    df.columns
-    .str.strip()
-    .str.replace(" ", "_")
-    .str.lower()
+# =========================
+# DATA PREP
+# =========================
+df['date'] = pd.to_datetime(df['date'], errors='coerce')
+df = df.dropna(subset=['date'])
+
+# Create latency band
+df['latency_band'] = pd.cut(
+    df['latency_ms'],
+    bins=[0, 15, 30, 50],
+    labels=['Low', 'Medium', 'High']
 )
-
-# Fix Date column
-if 'date' in df.columns:
-    df['date'] = pd.to_datetime(df['date'], errors='coerce')
-    months = df['date'].dt.month_name().unique()
-    st.write(months)
-else:
-    st.error(f"Date column not found. Available: {df.columns}")
-df = load_data()
-
 
 # =========================
 # SIDEBAR FILTERS
 # =========================
 st.sidebar.title("🔍 Filters")
 
-# Check if date column exists
-if 'date' in df.columns:
-    
-    # Convert to datetime
-    df['date'] = pd.to_datetime(df['date'], errors='coerce')
-    
-    # Drop null dates (important)
-    df = df.dropna(subset=['date'])
-    
-    # Extract months
-    month_list = df['date'].dt.month_name().unique()
-    
-    # Sidebar filter
-    month = st.sidebar.multiselect(
-        "Month",
-        options=month_list,
-        default=month_list
-    )
-    
-    # Apply filter
-    df = df[df['date'].dt.month_name().isin(month)]
-
-else:
-    st.error(f"❌ 'date' column not found. Available columns: {df.columns}")
-
-if 'latency_ms' in df.columns:
-    
-    df['latency_band'] = pd.cut(
-        df['latency_ms'],
-        bins=[0, 50, 100, 200, 500],
-        labels=['Low', 'Medium', 'High', 'Very High']
-    )
-st.sidebar.title("🔍 Filters")
-
-if 'latency_band' in df.columns:
-
-    latency_band = st.sidebar.multiselect(
-        "Latency Band",
-        options=df['latency_band'].dropna().unique(),
-        default=df['latency_band'].dropna().unique()
-    )
-
-    df = df[df['latency_band'].isin(latency_band)]
-
-else:
-    st.error(f"❌ latency_band not found. Available columns: {df.columns}")
-
-if 'network_quality' in df.columns:
-
-    quality = st.sidebar.multiselect(
-        "Network Quality",
-        options=df['network_quality'].dropna().unique(),
-        default=df['network_quality'].dropna().unique()
-    )
-
-    df = df[df['network_quality'].isin(quality)]
-
-else:
-    st.error(f"❌ network_quality not found. Available: {df.columns}")
-
-st.sidebar.title("🔍 Filters")
-
-if 'operation_mode' in df.columns:
-
-    operation = st.sidebar.multiselect(
-        "Operation Mode",
-        options=df['operation_mode'].dropna().unique(),
-        default=df['operation_mode'].dropna().unique()
-    )
-
-    df = df[df['operation_mode'].isin(operation)]
-
-else:
-    st.error(f"❌ operation_mode not found. Available: {df.columns}")
-
-# FILTER DATA
-if all(col in df.columns for col in ['date','latency_band','network_quality','operation_mode']):
-    
-    df['date'] = pd.to_datetime(df['date'], errors='coerce')
-
-    df = df[
-        (df['date'].dt.month_name().isin(month)) &
-        (df['latency_band'].isin(latency_band)) &
-        (df['network_quality'].isin(quality)) &
-        (df['operation_mode'].isin(operation))
-    ]
-
-else:
-    st.error(f"Missing columns. Available: {df.columns}")
-
-# =========================
-# DASHBOARD TITLE
-# =========================
-st.title("📊 NETWORK PERFORMANCE DASHBOARD")
-
-# =========================
-# KPI SECTION
-# =========================
-col1, col2, col3 = st.columns(3)
-
-# Network Stability
-if 'network_stability_index' in df.columns:
-    col1.metric(
-        "Avg Network Stability Index",
-        round(df['network_stability_index'].mean(), 2)
-    )
-else:
-    col1.metric("Avg Network Stability Index", "N/A")
-
-# Latency
-latency_col = None
-
-if 'latency_ms' in df.columns:
-    latency_col = 'latency_ms'
-elif 'network_latency_ms' in df.columns:
-    latency_col = 'network_latency_ms'
-
-if latency_col:
-    col2.metric(
-        "Avg Latency (ms)",
-        round(df[latency_col].mean(), 2)
-    )
-else:
-    col2.metric("Avg Latency (ms)", "N/A")
-
-# Efficiency
-if 'efficiency_status' in df.columns:
-    col3.metric(
-        "High Efficiency %",
-        round((df['efficiency_status'].str.lower() == "high").mean() * 100, 2)
-    )
-else:
-    col3.metric("High Efficiency %", "N/A")
-
-# =========================
-# CHART ROW 1
-# =========================
-col1, col2, col3 = st.columns(3)
-
-# Efficiency by Operation Mode
-if 'operation_mode' in df.columns and 'efficiency' in df.columns:
-
-    eff_mode = df.groupby('operation_mode')['efficiency'].mean().reset_index()
-
-    fig1 = px.bar(
-        eff_mode,
-        x='operation_mode',
-        y='efficiency',
-        color='operation_mode',
-        title="Efficiency by Operation Mode"
-    )
-
-    col1.plotly_chart(fig1, use_container_width=True)
-
-else:
-    st.error(f"Missing columns. Available: {df.columns}")
-
-# Daily Trend
-# Check columns safely
-if all(col in df.columns for col in ['date', 'production_speed_units_per_hr']):
-
-    # detect correct latency column
-    latency_col = None
-    if 'latency_ms' in df.columns:
-        latency_col = 'latency_ms'
-    elif 'network_latency_ms' in df.columns:
-        latency_col = 'network_latency_ms'
-
-    if latency_col:
-
-        trend = df.groupby('date')[[latency_col, 'production_speed_units_per_hr']].mean().reset_index()
-
-        fig2 = px.line(
-            trend,
-            x='date',
-            y=[latency_col, 'production_speed_units_per_hr'],
-            title="Daily Network & Production Trend"
-        )
-
-        col2.plotly_chart(fig2, use_container_width=True)
-
-    else:
-        st.error("❌ Latency column not found")
-
-else:
-    st.error(f"❌ Required columns missing. Available: {df.columns}")
-
-# Pie Chart (Network Quality)
-if 'network_quality' in df.columns:
-
-    fig3 = px.pie(
-        df,
-        names='network_quality',
-        title="Network Quality Distribution"
-    )
-
-    col3.plotly_chart(fig3, use_container_width=True)
-
-else:
-    st.error(f"❌ network_quality not found. Available: {df.columns}")
-
-# =========================
-# CHART ROW 2
-# =========================
-col1, col2, col3 = st.columns(3)
-
-# Efficiency Status Distribution
-fig4 = px.histogram(
-    df,
-    x='efficiency_status',
-    color='efficiency_status',
-    title="Efficiency Status Distribution",
-    text_auto=True
+month = st.sidebar.multiselect(
+    "Month",
+    df['date'].dt.month_name().unique(),
+    default=df['date'].dt.month_name().unique()
 )
 
-# Scatter (Latency vs Speed)
-# Detect correct latency column
-latency_col = None
+latency = st.sidebar.multiselect(
+    "Latency Band",
+    df['latency_band'].dropna().unique(),
+    default=df['latency_band'].dropna().unique()
+)
 
-if 'latency_ms' in df.columns:
-    latency_col = 'latency_ms'
-elif 'network_latency_ms' in df.columns:
-    latency_col = 'network_latency_ms'
+quality = st.sidebar.multiselect(
+    "Network Quality",
+    df['network_quality'].unique(),
+    default=df['network_quality'].unique()
+)
 
-if all(col in df.columns for col in ['production_speed_units_per_hr', 'network_quality']) and latency_col:
+operation = st.sidebar.multiselect(
+    "Operation Mode",
+    df['operation_mode'].unique(),
+    default=df['operation_mode'].unique()
+)
 
-    fig5 = px.scatter(
-        df,
-        x=latency_col,
-        y='production_speed_units_per_hr',
-        color='network_quality',
-        title="Latency vs Production Speed"
-    )
+# Apply filters
+df = df[
+    (df['date'].dt.month_name().isin(month)) &
+    (df['latency_band'].isin(latency)) &
+    (df['network_quality'].isin(quality)) &
+    (df['operation_mode'].isin(operation))
+]
 
-    col2.plotly_chart(fig5, use_container_width=True)
+# =========================
+# DASHBOARD 1
+# =========================
+st.title("📊 NETWORK PERFORMANCE OVERVIEW")
 
-else:
-    st.error(f"❌ Required columns missing. Available: {df.columns}")
-# Area Chart
-latency_day = df.groupby(df['Date'].dt.day)['Efficiency'].mean().reset_index()
-fig6 = px.area(latency_day, x='Date', y='Efficiency',
+col1, col2, col3 = st.columns(3)
+
+col1.metric("Avg Network Stability Index", round(df['network_stability_index'].mean(), 2))
+col2.metric("Avg Network Latency (ms)", round(df['latency_ms'].mean(), 2))
+col3.metric("High Efficiency %", round((df['efficiency_status'] == "High").mean() * 100, 2))
+
+# Charts Row 1
+c1, c2, c3 = st.columns(3)
+
+fig1 = px.bar(
+    df.groupby('operation_mode')['efficiency'].mean().reset_index(),
+    x='operation_mode', y='efficiency',
+    color='operation_mode',
+    title="Efficiency by Operation Mode"
+)
+c1.plotly_chart(fig1, use_container_width=True)
+
+trend = df.groupby('date')[['latency_ms', 'production_speed_units_per_hr']].mean().reset_index()
+fig2 = px.line(trend, x='date', y=['latency_ms', 'production_speed_units_per_hr'],
+               title="Daily Network & Production Trend")
+c2.plotly_chart(fig2, use_container_width=True)
+
+fig3 = px.pie(df, names='network_quality', title="Network Quality Distribution")
+c3.plotly_chart(fig3, use_container_width=True)
+
+# Charts Row 2
+c4, c5, c6 = st.columns(3)
+
+fig4 = px.histogram(df, x='efficiency_status', color='efficiency_status',
+                    title="Efficiency Status Distribution")
+c4.plotly_chart(fig4, use_container_width=True)
+
+fig5 = px.scatter(df, x='latency_ms', y='production_speed_units_per_hr',
+                  color='network_quality',
+                  title="Latency vs Production Speed")
+c5.plotly_chart(fig5, use_container_width=True)
+
+lat_day = df.groupby(df['date'].dt.day)['efficiency'].mean().reset_index()
+fig6 = px.area(lat_day, x='date', y='efficiency',
                title="Latency Tolerance Benchmark")
-col3.plotly_chart(fig6, use_container_width=True)
+c6.plotly_chart(fig6, use_container_width=True)
 
 # =========================
 # DASHBOARD 2
@@ -298,29 +127,26 @@ col3.plotly_chart(fig6, use_container_width=True)
 st.markdown("---")
 st.title("📊 NETWORK IMPACT ON MANUFACTURING")
 
-# KPI
 col1, col2, col3 = st.columns(3)
 
-col1.metric("Avg Packet Loss", round(df['Packet_Loss'].mean(), 2))
-col2.metric("Avg Production Speed", round(df['Production_Speed_units_per_hr'].mean(), 2))
-col3.metric("Avg Error Rate", round(df['Error_Rate'].mean(), 2))
+col1.metric("Avg Packet Loss", round(df['packet_loss'].mean(), 2))
+col2.metric("Avg Production Speed", round(df['production_speed_units_per_hr'].mean(), 2))
+col3.metric("Avg Error Rate", round(df['error_rate'].mean(), 2))
 
-# =========================
-# CHART ROW 3
-# =========================
-col1, col2, col3 = st.columns(3)
+# Charts Row 3
+c7, c8, c9 = st.columns(3)
 
-# Speed by Latency Band
-speed_band = df.groupby('Latency_Band')['Production_Speed_units_per_hr'].mean().reset_index()
-fig7 = px.bar(speed_band, x='Latency_Band', y='Production_Speed_units_per_hr',
-              color='Latency_Band',
-              title="Speed by Latency Band")
-col1.plotly_chart(fig7, use_container_width=True)
+fig7 = px.bar(
+    df.groupby('latency_band')['production_speed_units_per_hr'].mean().reset_index(),
+    x='latency_band', y='production_speed_units_per_hr',
+    color='latency_band',
+    title="Speed by Latency Band"
+)
+c7.plotly_chart(fig7, use_container_width=True)
 
-# Heatmap
-heat = df.pivot_table(values='Network_Stability_Index',
-                      index='Operation_Mode',
-                      columns='Machine_ID',
+heat = df.pivot_table(values='network_stability_index',
+                      index='operation_mode',
+                      columns='machine_id',
                       aggfunc='mean')
 
 fig8 = go.Figure(data=go.Heatmap(
@@ -329,45 +155,35 @@ fig8 = go.Figure(data=go.Heatmap(
     y=heat.index
 ))
 fig8.update_layout(title="Machine NSI Heatmap")
-col2.plotly_chart(fig8, use_container_width=True)
+c8.plotly_chart(fig8, use_container_width=True)
 
-# Error vs Packet Loss
-fig9 = px.box(df, x='Packet_Loss_Band', y='Error_Rate',
-              color='Packet_Loss_Band',
+fig9 = px.box(df, x='packet_loss_band', y='error_rate',
+              color='packet_loss_band',
               title="Error by Packet Loss")
-col3.plotly_chart(fig9, use_container_width=True)
+c9.plotly_chart(fig9, use_container_width=True)
 
-# =========================
-# CHART ROW 4
-# =========================
-col1, col2, col3 = st.columns(3)
+# Charts Row 4
+c10, c11, c12 = st.columns(3)
 
-# Efficiency vs Latency
-fig10 = px.bar(df, x='Latency_Band', y='Efficiency',
-               color='Efficiency_Status',
+fig10 = px.bar(df, x='latency_band', y='efficiency',
+               color='efficiency_status',
                title="Efficiency by Latency Band")
-col1.plotly_chart(fig10, use_container_width=True)
+c10.plotly_chart(fig10, use_container_width=True)
 
-# Scatter (Defect vs Packet Loss)
-fig11 = px.scatter(df, x='Packet_Loss', y='Quality_Control_Defect_Rate',
-                   color='Network_Quality',
+fig11 = px.scatter(df, x='packet_loss', y='quality_control_defect_rate',
+                   color='network_quality',
                    title="Defect vs Packet Loss")
-col2.plotly_chart(fig11, use_container_width=True)
+c11.plotly_chart(fig11, use_container_width=True)
 
-# Treemap (Risk Events)
-
-import numpy as np
-
+# Risk Classification
 conditions = [
-    (df['Network_Latency_ms'] > 30) & (df['Packet_Loss'] > 3.5),
-    (df['Network_Latency_ms'] > 30) | (df['Packet_Loss'] > 3.5)
+    (df['latency_ms'] > 30) & (df['packet_loss'] > 3.5),
+    (df['latency_ms'] > 30) | (df['packet_loss'] > 3.5)
 ]
 
 choices = ["CRITICAL", "WARNING"]
 
-df['Risk_Level'] = np.select(conditions, choices, default="NORMAL")
+df['risk_level'] = np.select(conditions, choices, default="NORMAL")
 
-fig12 = px.treemap(df,
-                   path=['Risk_Level'],
-                   title="Network Risk Events")
-col3.plotly_chart(fig12, use_container_width=True)
+fig12 = px.treemap(df, path=['risk_level'], title="Network Risk Events")
+c12.plotly_chart(fig12, use_container_width=True)
