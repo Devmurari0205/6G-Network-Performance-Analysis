@@ -439,10 +439,41 @@ else:
 col1, col2, col3 = st.columns(3)
 
 # Efficiency vs Latency
-fig10 = px.bar(df, x='Latency_Band', y='Efficiency',
-               color='Efficiency_Status',
-               title="Efficiency by Latency Band")
-col1.plotly_chart(fig10, use_container_width=True)
+# =========================
+# BAR CHART (FIXED)
+# =========================
+
+# Create latency_band if not exists
+if 'latency_band' not in df.columns and 'latency_ms' in df.columns:
+    df['latency_band'] = pd.cut(
+        df['latency_ms'],
+        bins=[0, 15, 30, 50],
+        labels=['Low', 'Medium', 'High']
+    )
+
+# Create efficiency_status if not exists
+if 'efficiency_status' not in df.columns and 'efficiency' in df.columns:
+    df['efficiency_status'] = pd.cut(
+        df['efficiency'],
+        bins=[0, 50, 80, 100],
+        labels=['Low', 'Medium', 'High']
+    )
+
+# Plot
+if all(col in df.columns for col in ['latency_band', 'efficiency', 'efficiency_status']):
+
+    fig10 = px.bar(
+        df,
+        x='latency_band',
+        y='efficiency',
+        color='efficiency_status',
+        title="Efficiency by Latency Band"
+    )
+
+    col1.plotly_chart(fig10, use_container_width=True)
+
+else:
+    col1.error(f"Missing columns. Available: {list(df.columns)}")
 
 # Scatter (Defect vs Packet Loss)
 fig11 = px.scatter(df, x='Packet_Loss', y='Quality_Control_Defect_Rate',
