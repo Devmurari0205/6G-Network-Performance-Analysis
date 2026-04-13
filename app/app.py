@@ -311,9 +311,9 @@ st.title("📊 NETWORK IMPACT ON MANUFACTURING")
 # KPI
 col1, col2, col3 = st.columns(3)
 
-col1.metric("Avg Packet Loss", round(df['Packet_Loss'].mean(), 2))
-col2.metric("Avg Production Speed", round(df['Production_Speed_units_per_hr'].mean(), 2))
-col3.metric("Avg Error Rate", round(df['Error_Rate'].mean(), 2))
+col1.metric("Avg Packet Loss", round(df['packet_loss'].mean(), 2))
+col2.metric("Avg Production Speed", round(df['production_speed_units_per_hr'].mean(), 2))
+col3.metric("Avg Error Rate", round(df['error_rate'].mean(), 2))
 
 # =========================
 # CHART ROW 3
