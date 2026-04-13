@@ -381,19 +381,30 @@ if 'latency_band' in df.columns and 'production_speed_units_per_hr' in df.column
 
 else:
     col1.error(f"Missing columns. Available: {list(df.columns)}")
-# Heatmap
-heat = df.pivot_table(values='Network_Stability_Index',
-                      index='Operation_Mode',
-                      columns='Machine_ID',
-                      aggfunc='mean')
 
-fig8 = go.Figure(data=go.Heatmap(
-    z=heat.values,
-    x=heat.columns,
-    y=heat.index
-))
-fig8.update_layout(title="Machine NSI Heatmap")
-col2.plotly_chart(fig8, use_container_width=True)
+# HEATMAP (FIXED)
+# =========================
+if all(col in df.columns for col in ['network_stability_index', 'operation_mode', 'machine_id']):
+
+    heat = df.pivot_table(
+        values='network_stability_index',
+        index='operation_mode',
+        columns='machine_id',
+        aggfunc='mean'
+    )
+
+    fig8 = go.Figure(data=go.Heatmap(
+        z=heat.values,
+        x=heat.columns,
+        y=heat.index
+    ))
+
+    fig8.update_layout(title="Machine NSI Heatmap")
+
+    col2.plotly_chart(fig8, use_container_width=True)
+
+else:
+    col2.error(f"Missing columns. Available: {list(df.columns)}")
 
 # Error vs Packet Loss
 fig9 = px.box(df, x='Packet_Loss_Band', y='Error_Rate',
