@@ -407,11 +407,32 @@ else:
     col2.error(f"Missing columns. Available: {list(df.columns)}")
 
 # Error vs Packet Loss
-fig9 = px.box(df, x='Packet_Loss_Band', y='Error_Rate',
-              color='Packet_Loss_Band',
-              title="Error by Packet Loss")
-col3.plotly_chart(fig9, use_container_width=True)
+# =========================
+# BOX PLOT (FIXED)
+# =========================
+# Create packet_loss_band if not exists
+if 'packet_loss_band' not in df.columns and 'packet_loss' in df.columns:
+    df['packet_loss_band'] = pd.cut(
+        df['packet_loss'],
+        bins=[0, 1, 3, 5],
+        labels=['Low', 'Medium', 'High']
+    )
 
+# Plot
+if 'packet_loss_band' in df.columns and 'error_rate' in df.columns:
+
+    fig9 = px.box(
+        df,
+        x='packet_loss_band',
+        y='error_rate',
+        color='packet_loss_band',
+        title="Error by Packet Loss"
+    )
+
+    col3.plotly_chart(fig9, use_container_width=True)
+
+else:
+    col3.error(f"Missing columns. Available: {list(df.columns)}")
 # =========================
 # CHART ROW 4
 # =========================
