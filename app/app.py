@@ -287,9 +287,19 @@ if all(col in df.columns for col in ['production_speed_units_per_hr', 'network_q
 else:
     st.error(f"❌ Required columns missing. Available: {df.columns}")
 # Area Chart
-latency_day = df.groupby(df['Date'].dt.day)['Efficiency'].mean().reset_index()
-fig6 = px.area(latency_day, x='Date', y='Efficiency',
-               title="Latency Tolerance Benchmark")
+latency_day = df.groupby(df['date'].dt.day).agg({
+    'efficiency': 'mean'
+}).reset_index()
+
+latency_day.columns = ['day', 'efficiency']
+
+fig6 = px.area(
+    latency_day,
+    x='day',
+    y='efficiency',
+    title="Latency Tolerance Benchmark"
+)
+
 col3.plotly_chart(fig6, use_container_width=True)
 
 # =========================
