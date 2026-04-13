@@ -328,16 +328,25 @@ col3.metric("Avg Error Rate", round(df['error_rate'].mean(), 2))
 col1, col2, col3 = st.columns(3)
 
 # Speed by Latency Band
+#  Ensure correct column names
+df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
+
+#  Create latency_band if not exists
 if 'latency_band' not in df.columns:
-    df['latency_band'] = pd.cut(
-        df['latency_ms'],
-        bins=[0, 15, 30, 50],
-        labels=['Low', 'Medium', 'High']
-    )
+    if 'latency_ms' in df.columns:
+        df['latency_band'] = pd.cut(
+            df['latency_ms'],
+            bins=[0, 15, 30, 50],
+            labels=['Low', 'Medium', 'High']
+        )
 
 if 'latency_band' in df.columns and 'production_speed_units_per_hr' in df.columns:
 
-    speed_band = df.groupby('latency_band')['production_speed_units_per_hr'].mean().reset_index()
+    speed_band = (
+        df.groupby('latency_band')['production_speed_units_per_hr']
+        .mean()
+        .reset_index()
+    )
 
     fig7 = px.bar(
         speed_band,
@@ -348,6 +357,10 @@ if 'latency_band' in df.columns and 'production_speed_units_per_hr' in df.column
     )
 
     col1.plotly_chart(fig7, use_container_width=True)
+
+else:
+    st.error(f"Missing columns. Found: {df.columns}")
+
 
 
 # Heatmap
