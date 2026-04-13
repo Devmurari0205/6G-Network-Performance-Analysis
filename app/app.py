@@ -26,6 +26,8 @@ def load_data():
 
 df = load_data()
 
+df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
+
 df.columns = (
     df.columns
     .str.strip()
@@ -327,22 +329,26 @@ col3.metric("Avg Error Rate", round(df['error_rate'].mean(), 2))
 
 col1, col2, col3 = st.columns(3)
 
-# 1. Speed by Latency Band (FIXED)
-if 'latency band' in df.columns and 'production_speed_units_per_hr' in df.columns:
+if 'latency_band' in df.columns and 'production_speed_units_per_hr' in df.columns:
 
-    speed_band = df.groupby('latency band')['production_speed_units_per_hr'].mean().reset_index()
+    speed_band = (
+        df.groupby('latency_band')['production_speed_units_per_hr']
+        .mean()
+        .reset_index()
+    )
 
     fig1 = px.bar(
         speed_band,
-        x='latency band',
+        x='latency_band',
         y='production_speed_units_per_hr',
-        color='latency band',
+        color='latency_band',
         title="Speed by Latency Band"
     )
-    c1.plotly_chart(fig1, use_container_width=True)
+
+    col1.plotly_chart(fig1, use_container_width=True)
 
 else:
-    c1.warning("Missing data for chart")
+    col1.error(f"Columns found: {df.columns}")
 
 # Heatmap
 heat = df.pivot_table(values='Network_Stability_Index',
