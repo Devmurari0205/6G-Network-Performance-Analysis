@@ -326,6 +326,70 @@ df.rename(columns={
 st.markdown("---")
 st.title("📊 NETWORK IMPACT ON MANUFACTURING")
 
+# Filter
+import pandas as pd
+
+# Packet Loss Band
+if 'packet_loss_band' not in df.columns and 'packet_loss' in df.columns:
+    df['packet_loss_band'] = pd.cut(
+        df['packet_loss'],
+        bins=[0, 1, 3, 5],
+        labels=['Low', 'Medium', 'High']
+    )
+
+# Packet Loss Category (same but you can customize)
+if 'packet_loss_category' not in df.columns and 'packet_loss' in df.columns:
+    df['packet_loss_category'] = pd.cut(
+        df['packet_loss'],
+        bins=[0, 1, 3, 5],
+        labels=['Good', 'Average', 'Poor']
+    )
+# =========================
+# SIDEBAR FILTERS
+# =========================
+st.sidebar.header("🔍 Filters")
+
+df_filtered = df.copy()
+
+# 1. Operation Mode
+if 'operation_mode' in df.columns:
+    op_mode = st.sidebar.multiselect(
+        "Operation Mode",
+        options=sorted(df['operation_mode'].dropna().unique()),
+        default=sorted(df['operation_mode'].dropna().unique())
+    )
+    df_filtered = df_filtered[df_filtered['operation_mode'].isin(op_mode)]
+
+# 2. Packet Loss Category
+if 'packet_loss_category' in df.columns:
+    plc = st.sidebar.multiselect(
+        "Packet Loss Category",
+        options=df['packet_loss_category'].dropna().unique(),
+        default=df['packet_loss_category'].dropna().unique()
+    )
+    df_filtered = df_filtered[df_filtered['packet_loss_category'].isin(plc)]
+
+# 3. Packet Loss Band
+if 'packet_loss_band' in df.columns:
+    plb = st.sidebar.multiselect(
+        "Packet Loss Band",
+        options=df['packet_loss_band'].dropna().unique(),
+        default=df['packet_loss_band'].dropna().unique()
+    )
+    df_filtered = df_filtered[df_filtered['packet_loss_band'].isin(plb)]
+
+# 4. Machine ID
+if 'machine_id' in df.columns:
+    machine = st.sidebar.multiselect(
+        "Machine ID",
+        options=df['machine_id'].dropna().unique(),
+        default=df['machine_id'].dropna().unique()
+    )
+    df_filtered = df_filtered[df_filtered['machine_id'].isin(machine)]
+
+fig = px.bar(df_filtered, x='operation_mode', y='production_speed_units_per_hr')
+st.plotly_chart(fig)
+
 # KPI
 # =========================
 # CREATE LATENCY BAND (IF NOT EXISTS)
