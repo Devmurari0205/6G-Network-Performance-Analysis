@@ -328,6 +328,13 @@ col3.metric("Avg Error Rate", round(df['error_rate'].mean(), 2))
 col1, col2, col3 = st.columns(3)
 
 # Speed by Latency Band
+if 'latency_band' not in df.columns:
+    df['latency_band'] = pd.cut(
+        df['latency_ms'],
+        bins=[0, 15, 30, 50],
+        labels=['Low', 'Medium', 'High']
+    )
+
 if 'latency_band' in df.columns and 'production_speed_units_per_hr' in df.columns:
 
     speed_band = df.groupby('latency_band')['production_speed_units_per_hr'].mean().reset_index()
@@ -341,7 +348,6 @@ if 'latency_band' in df.columns and 'production_speed_units_per_hr' in df.column
     )
 
     col1.plotly_chart(fig7, use_container_width=True)
-
 
 
 # Heatmap
