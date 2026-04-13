@@ -262,6 +262,52 @@ else:
 # =========================
 # CHART ROW 2
 # =========================
+import pandas as pd
+
+# Create Latency Band (VERY IMPORTANT)
+if 'latency_band' not in df.columns and 'network_latency_ms' in df.columns:
+    df['latency_band'] = pd.cut(
+        df['network_latency_ms'],
+        bins=[0, 20, 50, 100],
+        labels=['Low', 'Medium', 'High']
+    )
+
+# Create Efficiency Status (optional but useful)
+if 'efficiency_status' not in df.columns and 'efficiency' in df.columns:
+    df['efficiency_status'] = pd.cut(
+        df['efficiency'],
+        bins=[0, 60, 80, 100],
+        labels=['Low', 'Average', 'High']
+    )
+
+import plotly.express as px
+
+# =========================
+# Efficiency by Latency Band
+# =========================
+
+if all(col in df_filtered.columns for col in ['latency_band', 'efficiency']):
+
+    fig = px.bar(
+        df_filtered,
+        x='latency_band',
+        y='efficiency',
+        color='latency_band',   # cleaner than efficiency_status
+        title="⚡ Efficiency by Latency Band",
+        barmode='group'
+    )
+
+    fig.update_layout(
+        xaxis_title="Latency Band",
+        yaxis_title="Efficiency",
+        height=400
+    )
+
+    col1.plotly_chart(fig, use_container_width=True)
+
+else:
+    col1.error(f"Missing columns. Available: {list(df_filtered.columns)}")
+ # -------------------------------------   
 col1, col2, col3 = st.columns(3)
 
 # Efficiency Status Distribution
