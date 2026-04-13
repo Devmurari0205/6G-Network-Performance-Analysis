@@ -324,40 +324,52 @@ col3.metric("Avg Error Rate", round(df['error_rate'].mean(), 2))
 # =========================
 # CHART ROW 3
 # =========================
+# =========================
+# SAFE SPEED BY LATENCY BAND (NO ERROR)
+# =========================
+
 col1, col2, col3 = st.columns(3)
 
-# Speed by Latency Band
-#  Ensure correct column names
-# ✅ Standardize column names (RUN ONLY ONCE after loading CSV)
+# Standardize column names (important)
 df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
 
-# ✅ Create latency_band safely
-if 'latency_band' not in df.columns and 'latency_ms' in df.columns:
-    df['latency_band'] = pd.cut(
-        df['latency_ms'],
-        bins=[0, 15, 30, 50],
-        labels=['Low', 'Medium', 'High']
-    )
+# Create latency_band safely
+try:
+    if 'latency_band' not in df.columns:
+        if 'latency_ms' in df.columns:
+            df['latency_band'] = pd.cut(
+                df['latency_ms'],
+                bins=[0, 15, 30, 50],
+                labels=['Low', 'Medium', 'High']
+            )
+except Exception as e:
+    st.error(f"Error creating latency band: {e}")
 
-# ✅ Chart (SAFE - no crash)
-col1, col2, col3 = st.columns(3)
+# ✅ Create chart safely (NO CRASH GUARANTEED)
+try:
+    if 'latency_band' in df.columns and 'production_speed_units_per_hr' in df.columns:
 
-if 'latency_band' in df.columns and 'production_speed_units_per_hr' in df.columns:
+        speed_band = (
+            df.groupby('latency_band', dropna=False)['production_speed_units_per_hr']
+            .mean()
+            .reset_index()
+        )
 
-    speed_band = df.groupby('latency_band', dropna=False)['production_speed_units_per_hr'].mean().reset_index()
+        fig7 = px.bar(
+            speed_band,
+            x='latency_band',
+            y='production_speed_units_per_hr',
+            color='latency_band',
+            title="Speed by Latency Band"
+        )
 
-    fig7 = px.bar(
-        speed_band,
-        x='latency_band',
-        y='production_speed_units_per_hr',
-        color='latency_band',
-        title="Speed by Latency Band"
-    )
+        col1.plotly_chart(fig7, use_container_width=True)
 
-    col1.plotly_chart(fig7, use_container_width=True)
+    else:
+        st.warning("Required columns not found for chart")
 
-else:
-    st.error(f"❌ Missing columns → {df.columns}")
+except Exception as e:
+    st.error(f"Chart error: {e}")
 
 # Heatmap
 heat = df.pivot_table(values='Network_Stability_Index',
