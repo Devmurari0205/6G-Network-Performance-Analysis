@@ -476,11 +476,28 @@ else:
     col1.error(f"Missing columns. Available: {list(df.columns)}")
 
 # Scatter (Defect vs Packet Loss)
-fig11 = px.scatter(df, x='Packet_Loss', y='Quality_Control_Defect_Rate',
-                   color='Network_Quality',
-                   title="Defect vs Packet Loss")
-col2.plotly_chart(fig11, use_container_width=True)
+# =========================
+# SCATTER PLOT (FIXED)
+# =========================
 
+if all(col in df.columns for col in [
+    'packet_loss',
+    'quality_control_defect_rate',
+    'network_quality'
+]):
+
+    fig11 = px.scatter(
+        df,
+        x='packet_loss',
+        y='quality_control_defect_rate',
+        color='network_quality',
+        title="Defect vs Packet Loss"
+    )
+
+    col2.plotly_chart(fig11, use_container_width=True)
+
+else:
+    col2.error(f"Missing columns. Available: {list(df.columns)}")
 # Treemap (Risk Events)
 
 import numpy as np
