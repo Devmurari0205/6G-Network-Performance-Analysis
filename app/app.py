@@ -321,7 +321,6 @@ col1, col2, col3 = st.columns(3)
 col1.metric("Avg Packet Loss", round(df['packet_loss'].mean(), 2))
 col2.metric("Avg Production Speed", round(df['production_speed_units_per_hr'].mean(), 2))
 col3.metric("Avg Error Rate", round(df['error_rate'].mean(), 2))
-
 # =========================
 # CHART ROW 3
 # =========================
@@ -329,24 +328,23 @@ col1, col2, col3 = st.columns(3)
 
 # Speed by Latency Band
 #  Ensure correct column names
+# ✅ Standardize column names (RUN ONLY ONCE after loading CSV)
 df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
 
-#  Create latency_band if not exists
-if 'latency_band' not in df.columns:
-    if 'latency_ms' in df.columns:
-        df['latency_band'] = pd.cut(
-            df['latency_ms'],
-            bins=[0, 15, 30, 50],
-            labels=['Low', 'Medium', 'High']
-        )
+# ✅ Create latency_band safely
+if 'latency_band' not in df.columns and 'latency_ms' in df.columns:
+    df['latency_band'] = pd.cut(
+        df['latency_ms'],
+        bins=[0, 15, 30, 50],
+        labels=['Low', 'Medium', 'High']
+    )
+
+# ✅ Chart (SAFE - no crash)
+col1, col2, col3 = st.columns(3)
 
 if 'latency_band' in df.columns and 'production_speed_units_per_hr' in df.columns:
 
-    speed_band = (
-        df.groupby('latency_band')['production_speed_units_per_hr']
-        .mean()
-        .reset_index()
-    )
+    speed_band = df.groupby('latency_band', dropna=False)['production_speed_units_per_hr'].mean().reset_index()
 
     fig7 = px.bar(
         speed_band,
@@ -359,9 +357,7 @@ if 'latency_band' in df.columns and 'production_speed_units_per_hr' in df.column
     col1.plotly_chart(fig7, use_container_width=True)
 
 else:
-    st.error(f"Missing columns. Found: {df.columns}")
-
-
+    st.error(f"❌ Missing columns → {df.columns}")
 
 # Heatmap
 heat = df.pivot_table(values='Network_Stability_Index',
