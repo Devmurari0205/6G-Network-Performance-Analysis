@@ -36,6 +36,8 @@ df.columns = (
     .str.replace("(", "")
     .str.replace(")", "")
 )
+
+df['Latency_Band'] = df['latency_band']
 # Fix Date column
 if 'date' in df.columns:
     df['date'] = pd.to_datetime(df['date'], errors='coerce')
@@ -337,11 +339,6 @@ if 'latency_band' not in df.columns:
             bins=[0, 15, 30, 50],
             labels=['Low', 'Medium', 'High']
         )
-
-# =========================
-# KPI
-# =========================
-c# =========================
 # KPI
 # =========================
 col1, col2, col3 = st.columns(3)
