@@ -315,6 +315,14 @@ col3.plotly_chart(fig6, use_container_width=True)
 # =========================
 # DASHBOARD 2
 # =========================
+# Rename columns properly
+df.rename(columns={
+    'Latency Band': 'latency_band',
+    'Production Speed (units per hr)': 'production_speed_units_per_hr',
+    'Packet Loss': 'packet_loss',
+    'Error Rate': 'error_rate'
+}, inplace=True)
+
 st.markdown("---")
 st.title("📊 NETWORK IMPACT ON MANUFACTURING")
 
