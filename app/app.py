@@ -78,11 +78,6 @@ if 'date' in df.columns:
     )
     
     # Apply filter
-    df = df[df['date'].dt.month_name().isin(month)]
-
-else:
-    st.error(f"❌ 'date' column not found. Available columns: {df.columns}")
-
 if 'latency_ms' in df.columns:
     
     df['latency_band'] = pd.cut(
