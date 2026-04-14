@@ -68,7 +68,7 @@ if 'date' in df.columns:
     df = df.dropna(subset=['date'])
     
     # Extract months
-    month_list = df['date'].dt.month_name().unique()
+    # month_list = df['date'].dt.month_name().unique()
     
     # Sidebar filter
     month = st.sidebar.multiselect(
@@ -76,8 +76,7 @@ if 'date' in df.columns:
         options=month_list,
         default=month_list
     )
-    
-    # Apply filter
+# Apply filter
 if 'latency_ms' in df.columns:
     
     df['latency_band'] = pd.cut(
