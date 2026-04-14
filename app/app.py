@@ -284,13 +284,19 @@ if 'efficiency_status' not in df.columns and 'efficiency' in df.columns:
 # Efficiency by Latency Band
 # =========================
 
+import plotly.express as px
+
+# =========================
+# Efficiency by Latency Band
+# =========================
+
 if all(col in df_filtered.columns for col in ['latency_band', 'efficiency']):
 
     fig = px.bar(
         df_filtered,
         x='latency_band',
         y='efficiency',
-        color='latency_band',   # cleaner than efficiency_status
+        color='latency_band',
         title="⚡ Efficiency by Latency Band",
         barmode='group'
     )
@@ -304,7 +310,7 @@ if all(col in df_filtered.columns for col in ['latency_band', 'efficiency']):
     col1.plotly_chart(fig, use_container_width=True)
 
 else:
-    col1.error(f"Missing columns. Available: {list(df_filtered.columns)}")
+    st.error(f"Missing columns. Available: {list(df_filtered.columns)}")
  # -------------------------------------   
 col1, col2, col3 = st.columns(3)
 
