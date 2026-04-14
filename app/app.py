@@ -283,8 +283,33 @@ if 'efficiency_status' not in df.columns and 'efficiency' in df.columns:
 # =========================
 # Efficiency by Latency Band
 # =========================
-
+import streamlit as st
 import plotly.express as px
+import pandas as pd
+
+# =========================
+# STEP 1: CLEAN COLUMNS
+# =========================
+df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
+
+# =========================
+# STEP 2: CREATE df_filtered (FIX)
+# =========================
+df_filtered = df.copy()
+
+# =========================
+# STEP 3: CREATE LATENCY BAND
+# =========================
+if 'latency_band' not in df_filtered.columns and 'network_latency_ms' in df_filtered.columns:
+    df_filtered['latency_band'] = pd.cut(
+        df_filtered['network_latency_ms'],
+        bins=[0, 20, 50, 100],
+        labels=['Low', 'Medium', 'High']
+    )
+
+# =========================
+# STEP 4: PLOT
+# =========================
 if all(col in df_filtered.columns for col in ['latency_band', 'efficiency']):
 
     fig = px.bar(
