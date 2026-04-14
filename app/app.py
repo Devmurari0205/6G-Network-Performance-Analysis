@@ -280,8 +280,6 @@ if 'efficiency_status' not in df.columns and 'efficiency' in df.columns:
         labels=['Low', 'Average', 'High']
     )
 
-import plotly.express as px
-
 # =========================
 # Efficiency by Latency Band
 # =========================
